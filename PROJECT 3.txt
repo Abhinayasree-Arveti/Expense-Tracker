@@ -1,0 +1,94 @@
+import java.io.*;
+import java.util.*;
+
+// Expense class to represent each expense entry
+class Expense implements Serializable {
+    private Date date;
+    private String category;
+    private double amount;
+
+    // Constructor
+    public Expense(Date date, String category, double amount) {
+        this.date = date;
+        this.category = category;
+        this.amount = amount;
+    }
+
+    // Getters
+    public Date getDate() {
+        return date;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+}
+
+// ExpenseTracker class to manage expenses
+public class ExpenseTracker {
+    private List<Expense> expenses;
+
+    // Constructor
+    public ExpenseTracker() {
+        expenses = new ArrayList<>();
+    }
+
+    // Method to add an expense
+    public void addExpense(Date date, String category, double amount) {
+        Expense expense = new Expense(date, category, amount);
+        expenses.add(expense);
+    }
+
+    // Method to list expenses
+    public List<Expense> listExpenses() {
+        return expenses;
+    }
+
+    // Method to calculate total expenses for a specific category
+    public double getTotalExpensesForCategory(String category) {
+        double total = 0;
+        for (Expense expense : expenses) {
+            if (expense.getCategory().equalsIgnoreCase(category)) {
+                total += expense.getAmount();
+            }
+        }
+        return total;
+    }
+
+    // Method to save expenses to a file
+    public void saveExpensesToFile(String filename) {
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filename))) {
+            outputStream.writeObject(expenses);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Method to load expenses from a file
+    public void loadExpensesFromFile(String filename) {
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(filename))) {
+            expenses = (List<Expense>) inputStream.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        // Example usage
+        ExpenseTracker tracker = new ExpenseTracker();
+        tracker.addExpense(new Date(), "Food", 50.0);
+        tracker.addExpense(new Date(), "Transportation", 30.0);
+        tracker.saveExpensesToFile("expenses.dat");
+        tracker.loadExpensesFromFile("expenses.dat");
+        List<Expense> expenses = tracker.listExpenses();
+        for (Expense expense : expenses) {
+            System.out.println("Date: " + expense.getDate() + ", Category: " + expense.getCategory() + ", Amount: " + expense.getAmount());
+        }
+        double totalFoodExpenses = tracker.getTotalExpensesForCategory("Food");
+        System.out.println("Total Food Expenses: " + totalFoodExpenses);
+    }
+}
